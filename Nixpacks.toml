@@ -1,0 +1,3 @@
+# Nixpacks.toml
+[build]
+buildpacks = ["heroku/go", "heroku/static"]
