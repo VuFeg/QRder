@@ -13,6 +13,11 @@ type TableInput struct {
     TableNumber string `json:"table_number" binding:"required"`
 }
 
+type TableUpdateInput struct {
+    TableNumber string `json:"table_number"`
+    Status      string `json:"status"`
+}
+
 // CreateTable xử lý logic tạo bàn mới
 func CreateTable(input TableInput) (*models.Table, error) {
 
@@ -51,13 +56,14 @@ func GetAllTables() ([]models.Table, error) {
 }
 
 // UpdateTable xử lý logic cập nhật thông tin bàn
-func UpdateTable(id uuid.UUID, input TableInput) (*models.Table, error) {
+func UpdateTable(id uuid.UUID, input TableUpdateInput) (*models.Table, error) {
     var table models.Table
     if result := configs.DB.First(&table, "id = ?", id); result.Error != nil {
         return nil, result.Error
     }
 
     table.TableNumber = input.TableNumber
+    table.Status = input.Status
     table.UpdatedAt = time.Now()
 
     if result := configs.DB.Save(&table); result.Error != nil {

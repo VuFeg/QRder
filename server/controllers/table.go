@@ -51,7 +51,7 @@ func GetAllTables(c *gin.Context) {
 // UpdateTableHandler xử lý request cập nhật thông tin bàn
 func UpdateTable(c *gin.Context) {
     id := c.Param("id")
-    var input services.TableInput
+    var input services.TableUpdateInput
     if err := c.ShouldBindJSON(&input); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return

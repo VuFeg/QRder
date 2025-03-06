@@ -1,0 +1,28 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Vendor directory
+vendor/
+
+# Go workspace file
+go.work
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Git
+.git
+.gitignore
+
+# Dockerfile
+Dockerfile
+.dockerignore
