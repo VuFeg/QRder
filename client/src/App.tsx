@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Tables from "./pages/Tables";
+import TableManagementDashboard from "./pages/TableManagementDashboard";
+import { ToastContainer } from "react-toastify";
 
 // Khởi tạo QueryClient
 const queryClient = new QueryClient();
@@ -10,9 +11,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route path="/tables" element={<Tables />} />
+          <Route path="/tables" element={<TableManagementDashboard />} />
         </Routes>
       </Router>
+      <ToastContainer />
     </QueryClientProvider>
   );
 }

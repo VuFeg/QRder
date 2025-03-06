@@ -4,10 +4,8 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 export interface TableData {
   id?: string;
-  tableNumber: string;
-  qrCodeUrl: string;
-  qrCodePath: string;
-  status?: "active" | "inactive";
+  table_number: string;
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -26,5 +24,15 @@ export const getTables = async () => {
 // API tạo bàn mới
 export const createTable = async (tableData: TableData) => {
   const res = await api.post("/api/table", tableData);
+  return res.data;
+};
+
+export const updateTable = async (tableData: TableData) => {
+  const res = await api.put(`/api/table/${tableData.id}`, tableData);
+  return res.data;
+};
+
+export const deleteTable = async (tableId: string) => {
+  const res = await api.delete(`/api/table/${tableId}`);
   return res.data;
 };
