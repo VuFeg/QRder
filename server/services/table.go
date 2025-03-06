@@ -3,12 +3,9 @@ package services
 import (
 	"QRder-be/configs"
 	"QRder-be/models"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/skip2/go-qrcode"
 )
 
 // TableInput chứa thông tin đầu vào khi tạo bàn
@@ -18,29 +15,11 @@ type TableInput struct {
 
 // CreateTable xử lý logic tạo bàn mới
 func CreateTable(input TableInput) (*models.Table, error) {
-    // Tạo URL QR code
-    qrUrl := configs.GetEnv("FRONTEND_URL") + input.TableNumber
-
-    // Tạo tên file QR
-    fileName := "qrcode_" + input.TableNumber + ".png"
-    filePath := filepath.Join("static", "qrcodes", fileName)
-
-    // Tạo thư mục nếu chưa tồn tại
-    if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-        return nil, err
-    }
-
-    // Sinh file QR code
-    if err := qrcode.WriteFile(qrUrl, qrcode.Medium, 256, filePath); err != nil {
-        return nil, err
-    }
 
     // Tạo object Table
     table := &models.Table{
         ID:          uuid.New(),
         TableNumber: input.TableNumber,
-        QRCodeURL:   qrUrl,
-        QRCodePath:  filePath,
         CreatedAt:   time.Now(),
         UpdatedAt:   time.Now(),
     }
@@ -93,11 +72,6 @@ func DeleteTable(id uuid.UUID) error {
     var table models.Table
     if result := configs.DB.First(&table, "id = ?", id); result.Error != nil {
         return result.Error
-    }
-
-    // Xóa file QR code
-    if err := os.Remove(table.QRCodePath); err != nil {
-        return err
     }
 
     if result := configs.DB.Delete(&table); result.Error != nil {

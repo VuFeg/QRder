@@ -1,12 +1,16 @@
 package routes
 
 import (
+	"QRder-be/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
 // SetupRouter khởi tạo và cấu hình các route cho ứng dụng.
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
+
+	router.Use(middleware.CORSMiddleware())
 
 	// Nhóm route public (Không cần xác thực)
 	public := router.Group("/")

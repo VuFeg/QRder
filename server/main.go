@@ -14,19 +14,6 @@ func main() {
 	configs.ConnectDB()
 	defer configs.CloseDB()
 
-	// Auto migrate các bảng
-    // err := configs.DB.AutoMigrate(
-    //     &models.Table{},
-    //     &models.Menu{},
-    //     &models.Staff{},
-    //     &models.Order{},
-    //     &models.OrderItem{},
-    //     &models.Notification{},
-    // )
-    // if err != nil {
-    //     log.Fatal("Không thể migrate database: ", err)
-    // }
-
 	// Khởi tạo router và các route
 	router := routes.SetupRouter()
 	port := os.Getenv("PORT")
