@@ -1,41 +1,39 @@
 package main
 
 import (
-	"log"
+	"QRder-be/configs"
+	"QRder-be/routes"
 	"os"
-	"qrder/config"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	// Tải file .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Không tìm thấy file .env, dùng biến môi trường hệ thống nếu có")
-	}
+	// Load biến môi trường từ file .env
+	configs.LoadEnv()
+	
+	// Kết nối đến PostgreSQL
+	configs.ConnectDB()
+	defer configs.CloseDB()
 
-	// Khởi tạo database
-	config.InitDB()
-	defer config.CloseDB()
+	// Auto migrate các bảng
+    // err := configs.DB.AutoMigrate(
+    //     &models.Table{},
+    //     &models.Menu{},
+    //     &models.Staff{},
+    //     &models.Order{},
+    //     &models.OrderItem{},
+    //     &models.Notification{},
+    // )
+    // if err != nil {
+    //     log.Fatal("Không thể migrate database: ", err)
+    // }
 
-	// Khởi tạo Supabase client
-	config.InitSupabase()
-
-	// Khởi tạo Fiber
-	app := fiber.New()
-
-	// Route kiểm tra
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("QRder Backend đang chạy!")
-	})
-
-	// Lấy port từ .env
+	// Khởi tạo router và các route
+	router := routes.SetupRouter()
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = ":3000"
+		port = ":8080"
 	}
 
-	log.Fatal(app.Listen(port))
+	// Chạy server tại cổng 8080
+	router.Run(port)
 }
