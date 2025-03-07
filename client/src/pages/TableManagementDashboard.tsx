@@ -20,21 +20,13 @@ const TableManagementDashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const {
-    data: tables = [],
-    error,
-    isLoading,
-  } = useQuery({
+  const { data: tables = [], isLoading } = useQuery({
     queryKey: ["tables"],
     queryFn: getTables,
   });
 
   if (isLoading) {
     return <LoadingPage />;
-  }
-
-  if (error) {
-    console.log(error);
   }
 
   const filteredTables = tables

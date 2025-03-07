@@ -17,22 +17,22 @@ export const api = axios.create({
 
 // API lấy danh sách bàn
 export const getTables = async () => {
-  const res = await api.get("/api/tables");
+  const res = await api.get("/admin/tables");
   return res.data;
 };
 
 // API tạo bàn mới
 export const createTable = async (tableData: TableData) => {
-  const res = await api.post("/api/table", tableData);
+  const res = await api.post("/admin/table", tableData);
   return res.data;
 };
 
 export const updateTable = async (tableData: TableData) => {
-  const res = await api.put(`/api/table/${tableData.id}`, tableData);
+  const res = await api.put(`/admin/table/${tableData.id}`, tableData);
   return res.data;
 };
 
 export const deleteTable = async (tableId: string) => {
-  const res = await api.delete(`/api/table/${tableId}`);
+  const res = await api.delete(`/admin/table/${tableId}`);
   return res.data;
 };
