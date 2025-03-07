@@ -30,3 +30,31 @@ func UploadImage(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"url": url})
 }
+
+func DeleteImage(c *gin.Context) {
+	type DeleteImageRequest struct {
+		Filename string `json:"filename" binding:"required"`
+	}
+
+	var req DeleteImageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request", "details": err.Error()})
+		return
+	}
+
+	if err := DeleteImageWithContext(c, req.Filename); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete image", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Image deleted successfully"})
+}
+
+// DeleteImageWithContext: Hàm trợ giúp để gọi từ service
+func DeleteImageWithContext(ctx *gin.Context, filename string) error {
+	stor, err := configs.GetStorage()
+	if err != nil {
+		return err
+	}
+	return stor.DeleteFile(filename)
+}

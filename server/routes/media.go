@@ -8,5 +8,6 @@ import (
 
 // MediaRoutes chứa các route liên quan đến media.
 func MediaRoutes(router *gin.RouterGroup) {
-	router.POST("/upload", controllers.UploadImage)
+	router.POST("/media/upload", controllers.UploadImage)
+	router.DELETE("/media", controllers.DeleteImage)
 }

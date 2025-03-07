@@ -8,7 +8,8 @@ import (
 
 type Menu struct {
     ID          uuid.UUID  `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
-    Name        string     `gorm:"type:varchar(100);not null" json:"name"`
+    NameVi      string     `gorm:"type:varchar(100);not null" json:"name_vi"`
+    NameEn      string     `gorm:"type:varchar(100);not null" json:"name_en"`
     Price       float64    `gorm:"type:decimal(10,2);not null" json:"price"`
     Category    string     `gorm:"type:varchar(50)" json:"category"`
     Available   bool       `gorm:"default:true" json:"available"`

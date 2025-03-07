@@ -10,8 +10,9 @@ import (
 
 // MenuInput dùng để nhận dữ liệu khi tạo món ăn mới
 type MenuInput struct {
-	Name        string  `json:"name" binding:"required"`
-	Price       float64 `json:"price" binding:"required"`
+	NameVi      string  `json:"name_vi" binding:"required"`
+	NameEn	    string  `json:"name_en" binding:"required"`
+	Price       float64  `json:"price" binding:"required"`
 	Category    string  `json:"category"`
 	Available   bool    `json:"available"`
 	Description string  `json:"description"`
@@ -28,10 +29,11 @@ func GetMenus() ([]models.Menu, error) {
 // CreateMenu tạo món ăn mới
 func CreateMenu(input MenuInput) (models.Menu, error) {
 	menu := models.Menu{
-		Name:        input.Name,
-		Price:       input.Price,
+		NameVi: 	input.NameVi,
+		NameEn: 	input.NameEn,
+		Price: 		input.Price,
 		Category:    input.Category,
-		Available:   input.Available,
+		Available:   true,
 		Description: input.Description,
 		ImageURL:    input.ImageURL,
 	}
@@ -54,7 +56,8 @@ func UpdateMenu(id uuid.UUID, input MenuInput) (models.Menu, error) {
 		return menu, result.Error
 	}
 
-	menu.Name = input.Name
+	menu.NameVi = input.NameVi
+	menu.NameEn = input.NameEn
 	menu.Price = input.Price
 	menu.Category = input.Category
 	menu.Available = input.Available

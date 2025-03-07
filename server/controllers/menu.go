@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"QRder-be/services"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +22,12 @@ func GetMenus(c *gin.Context) {
 // CreateMenu xử lý API POST /api/menu
 func CreateMenu(c *gin.Context) {
     var menuInput services.MenuInput
+    fmt.Println(menuInput)
     if err := c.ShouldBindJSON(&menuInput); err != nil {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
+    fmt.Println(menuInput)
     newMenu, err := services.CreateMenu(menuInput)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
