@@ -13,11 +13,11 @@ func SetupRouter() *gin.Engine {
 	router.Use(middleware.CORSMiddleware())
 
 	// Nhóm route public (Không cần xác thực)
-	public := router.Group("/")
+	public := router.Group("/api")
 	AuthRoutes(public)
 
 	// Nhóm route cần xác thực (private API)
-	api := router.Group("/api")
+	api := router.Group("/api/admin")
 	// api.Use(middleware.AuthMiddleware())
 
 	// Đăng ký từng nhóm route

@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-lambda-go v1.47.0 // indirect
 	github.com/supabase-community/functions-go v0.0.0-20220927045802-22373e6cb51d // indirect
 	github.com/supabase-community/gotrue-go v1.2.0 // indirect
 	github.com/supabase-community/postgrest-go v0.0.11 // indirect
@@ -49,6 +50,7 @@ require (
 	github.com/supabase-community/supabase-go v0.0.4
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
+	github.com/vercel/go-bridge v0.0.0-20221108222652-296f4c6bdb6d
 	golang.org/x/arch v0.12.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
