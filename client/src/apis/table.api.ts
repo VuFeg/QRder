@@ -21,6 +21,11 @@ export const getTables = async () => {
   return res.data;
 };
 
+export const getTable = async (tableId: string) => {
+  const res = await api.get(`/admin/table/${tableId}`);
+  return res.data;
+};
+
 // API tạo bàn mới
 export const createTable = async (tableData: TableData) => {
   const res = await api.post("/admin/table", tableData);

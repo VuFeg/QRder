@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiSearch, FiShoppingCart, FiX } from "react-icons/fi";
 import { useSearchParams } from "react-router-dom";
 import { Menu } from "../types/menu.type";
 import { useMenus } from "../hooks/useMenus";
 import LoadingPage from "../components/common/LoadingPage";
+import { useOrder } from "../hooks/useOrder";
+import { useTables } from "../hooks/useTables";
+import { useOrderItems } from "../hooks/useOrderItems";
+import { Order } from "../types/order.type";
 
 const categories = [
   { id: "all", name: "All Items" },
@@ -22,26 +26,112 @@ const pageVariants = {
 
 const OrderPage = () => {
   const [searchParams] = useSearchParams();
-  const tableNumber = searchParams.get("table");
-  console.log(tableNumber);
+  const tableId = searchParams.get("table");
+  const { useGetTable } = useTables();
+  const { data: table, isLoading: isLoadingTable } = useGetTable(tableId ?? "");
+  const { createOrderMutation, useGetOrder } = useOrder();
+
+  const {
+    data: order,
+    isLoading: isLoadingOrder,
+    refetch: refetchOrder,
+  }: {
+    data: Order | undefined;
+    isLoading: boolean;
+    refetch: () => void;
+  } = useGetOrder(table?.order_id ?? "");
+
+  const [shouldRefetch, setShouldRefetch] = useState(false);
+
+  useEffect(() => {
+    if (shouldRefetch) {
+      refetchOrder();
+      setShouldRefetch(false);
+    }
+  }, [shouldRefetch, refetchOrder]);
+
+  useEffect(() => {
+    if (!table?.order_id && !isLoadingTable) {
+      if (tableId) {
+        createOrderMutation.mutate({
+          table_id: tableId,
+          Note: "",
+          PaymentMethod: "",
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [table]);
 
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [cart, setCart] = useState<Menu[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const { menuItems, isLoading } = useMenus();
+  const { createOrderItemMutation, updateOrderItemMutation } = useOrderItems();
 
   const addToCart = (item: Menu) => {
-    setCart([...cart, item]);
+    const existingItem = order?.order_items.find(
+      (orderItem) => orderItem.menu_id === item.id
+    );
+    if (existingItem) {
+      updateOrderItemMutation.mutate(
+        {
+          id: existingItem.id,
+          order_id: table?.order_id ?? "",
+          menu_id: item.id,
+          quantity: existingItem.quantity + 1,
+          price: item.price,
+        },
+        {
+          onSuccess: () => {
+            setShouldRefetch(true);
+          },
+        }
+      );
+    } else {
+      createOrderItemMutation.mutate(
+        {
+          order_id: table?.order_id ?? "",
+          menu_id: item.id,
+          quantity: 1,
+          price: item.price,
+        },
+        {
+          onSuccess: () => {
+            setShouldRefetch(true);
+          },
+        }
+      );
+    }
   };
 
   const removeFromCart = (itemId: string) => {
-    setCart(cart.filter((item) => item.id !== itemId));
+    const existingItem = order?.order_items.find(
+      (orderItem) => orderItem.menu_id === itemId
+    );
+    if (existingItem) {
+      updateOrderItemMutation.mutate(
+        {
+          id: existingItem.id,
+          order_id: table?.order_id ?? "",
+          menu_id: itemId,
+          quantity: existingItem.quantity - 1,
+          price: existingItem.price,
+        },
+        {
+          onSuccess: () => {
+            setShouldRefetch(true);
+          },
+        }
+      );
+    }
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price, 0).toFixed(2);
+    return order?.order_items
+      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .toFixed(2);
   };
 
   const filteredItems = menuItems
@@ -54,7 +144,7 @@ const OrderPage = () => {
         item.name_vi.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  if (isLoading) return <LoadingPage />;
+  if (isLoading || isLoadingOrder) return <LoadingPage />;
 
   return (
     <motion.div
@@ -74,9 +164,9 @@ const OrderPage = () => {
             className="relative p-2"
           >
             <FiShoppingCart className="text-2xl text-foreground" />
-            {cart.length > 0 && (
+            {(order?.order_items?.length ?? 0) > 0 && (
               <span className="absolute -top-1 -right-1 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                {cart.length}
+                {order?.order_items.length}
               </span>
             )}
           </motion.button>
@@ -174,9 +264,9 @@ const OrderPage = () => {
                 </motion.button>
               </div>
 
-              {cart.map((item: Menu) => (
+              {order?.order_items.map((orderItem) => (
                 <motion.div
-                  key={item.id}
+                  key={orderItem.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -184,16 +274,16 @@ const OrderPage = () => {
                 >
                   <div>
                     <h3 className="font-medium text-foreground">
-                      {item.name_en}
+                      {orderItem.menu.name_en}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      ${item.price}
+                      ${orderItem.price} x {orderItem.quantity}
                     </p>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(orderItem.menu_id)}
                     className="text-destructive"
                   >
                     <FiX />

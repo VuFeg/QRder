@@ -34,9 +34,10 @@ const QRCodeModal = ({ table, onClose }: QRCodeModalProps) => {
 
   const currentURL = window.location.origin;
   const queryParams = new URLSearchParams({
-    table: table.table_number,
+    table: table.id,
   }).toString();
   const qrValue = `${currentURL}/order?${queryParams}`;
+  console.log(qrValue);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">

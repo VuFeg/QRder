@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createTable,
   deleteTable,
+  getTable,
   getTables,
   updateTable,
 } from "../apis/table.api";
@@ -14,6 +15,14 @@ export const useTables = () => {
     queryKey: ["tables"],
     queryFn: getTables,
   });
+
+  const useGetTable = (id: string) => {
+    return useQuery({
+      queryKey: ["tables", id],
+      queryFn: () => getTable(id),
+      enabled: !!id,
+    });
+  };
 
   const createTableMutation = useMutation({
     mutationFn: createTable,
@@ -68,5 +77,6 @@ export const useTables = () => {
     createTableMutation,
     updateTableMutation,
     deleteTableMutation,
+    useGetTable,
   };
 };
