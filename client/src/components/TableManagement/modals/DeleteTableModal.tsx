@@ -1,31 +1,14 @@
-import { useMutation, QueryClient } from "@tanstack/react-query";
 import { Table } from "../../../types/table.type";
-import { deleteTable } from "../../../apis/table.api";
 import { toast } from "react-toastify";
+import { useTables } from "../../../hooks/useTables";
 
 interface DeleteTableModalProps {
   table: Table;
   onClose: () => void;
-  queryClient: QueryClient;
 }
 
-const DeleteTableModal = ({
-  table,
-  onClose,
-  queryClient,
-}: DeleteTableModalProps) => {
-  const mutation = useMutation({
-    mutationFn: deleteTable,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tables"] });
-      toast.success("Table deleted successfully!");
-      onClose();
-    },
-    onError: (error) => {
-      toast.error("Failed to delete table.");
-      console.error("Failed to delete table:", error);
-    },
-  });
+const DeleteTableModal = ({ table, onClose }: DeleteTableModalProps) => {
+  const { deleteTableMutation } = useTables();
 
   const handleDeleteTable = () => {
     if (table.status === "occupied") {
@@ -33,7 +16,11 @@ const DeleteTableModal = ({
       onClose();
       return;
     }
-    mutation.mutate(table.id);
+    deleteTableMutation.mutate(table.id, {
+      onSuccess: () => {
+        onClose();
+      },
+    });
   };
 
   return (

@@ -1,29 +1,25 @@
-// src/components/table-management/modals/AddTableModal.tsx
 import { useState } from "react";
-import { useMutation, QueryClient } from "@tanstack/react-query";
-import { createTable } from "../../../apis/table.api";
-import { toast } from "react-toastify";
+import { useTables } from "../../../hooks/useTables";
 
 interface AddTableModalProps {
   onClose: () => void;
-  queryClient: QueryClient;
 }
 
-const AddTableModal = ({ onClose, queryClient }: AddTableModalProps) => {
+const AddTableModal = ({ onClose }: AddTableModalProps) => {
   const [tableNumber, setTableNumber] = useState("");
 
-  const mutation = useMutation({
-    mutationFn: createTable,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tables"] });
-      toast.success("Table added successfully");
-      onClose();
-    },
-  });
+  const { createTableMutation } = useTables();
 
   const handleAddTable = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutation.mutate({ table_number: tableNumber });
+    createTableMutation.mutate(
+      { table_number: tableNumber },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
   };
 
   return (

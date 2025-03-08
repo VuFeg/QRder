@@ -1,38 +1,32 @@
 import { useState } from "react";
-import { useMutation, QueryClient } from "@tanstack/react-query";
 import { Table } from "../../../types/table.type";
-import { updateTable } from "../../../apis/table.api";
-import { toast } from "react-toastify";
+import { useTables } from "../../../hooks/useTables";
 
 interface EditTableModalProps {
   table: Table;
   onClose: () => void;
-  queryClient: QueryClient;
 }
 
-const EditTableModal = ({
-  table,
-  onClose,
-  queryClient,
-}: EditTableModalProps) => {
+const EditTableModal = ({ table, onClose }: EditTableModalProps) => {
   const [tableNumber, setTableNumber] = useState(table.table_number);
   const [status, setStatus] = useState(table.status);
 
-  const mutation = useMutation({
-    mutationFn: updateTable,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tables"] });
-      toast.success("Table updated successfully");
-      onClose();
-    },
-    onError: (error) => {
-      console.error("Failed to update table:", error);
-    },
-  });
+  const { updateTableMutation } = useTables();
 
   const handleEditTable = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutation.mutate({ id: table.id, table_number: tableNumber, status });
+    updateTableMutation.mutate(
+      {
+        id: table.id,
+        table_number: tableNumber,
+        status,
+      },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      }
+    );
   };
 
   return (

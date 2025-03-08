@@ -8,9 +8,11 @@ import {
 } from "../apis/menu.api";
 import { toast } from "react-toastify";
 import { CreateMenuForm, Menu } from "../types/menu.type";
+import { useNavigate } from "react-router-dom";
 
 export const useMenus = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Lấy danh sách món ăn
   const { data: menuItems = [], isLoading } = useQuery({
@@ -23,10 +25,17 @@ export const useMenus = () => {
     mutationFn: (newMenu: CreateMenuForm) => createMenu(newMenu),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      toast.success("Menu item created successfully");
+      toast.success("Menu item created successfully", {
+        autoClose: 1500,
+        onClose: () => {
+          navigate("/menus");
+        },
+      });
     },
     onError: () => {
-      toast.error("Failed to create menu item");
+      toast.error("Failed to create menu item", {
+        autoClose: 1500,
+      });
     },
   });
 
@@ -35,7 +44,9 @@ export const useMenus = () => {
     mutationFn: deleteMenu,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      toast.success("Menu item deleted successfully");
+      toast.success("Menu item deleted successfully", {
+        autoClose: 1500,
+      });
     },
     onError: () => {
       toast.error("Failed to delete menu item");
@@ -56,7 +67,12 @@ export const useMenus = () => {
     mutationFn: (menu: Menu) => updateMenu(menu.id, menu), // Giả sử menu có thuộc tính `id`
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["menuItems"] });
-      toast.success("Menu item updated successfully");
+      toast.success("Menu item updated successfully", {
+        autoClose: 1500,
+        onClose: () => {
+          navigate("/menus");
+        },
+      });
     },
     onError: () => {
       toast.error("Failed to update menu item");

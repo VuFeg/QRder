@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { FaPlus, FaFilter, FaSearch } from "react-icons/fa";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Table } from "../types/table.type";
-import { getTables } from "../apis/table.api";
 import LoadingPage from "../components/common/LoadingPage";
 import TableCard from "../components/TableManagement/TableCard";
 import AddTableModal from "../components/TableManagement/modals/AddTableModal";
 import EditTableModal from "../components/TableManagement/modals/EditTableModal";
 import DeleteTableModal from "../components/TableManagement/modals/DeleteTableModal";
 import QRCodeModal from "../components/TableManagement/modals/QRCodeModal";
+import { useTables } from "../hooks/useTables";
 
 const TableManagementDashboard = () => {
-  const queryClient = useQueryClient();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -20,10 +18,7 @@ const TableManagementDashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: tables = [], isLoading } = useQuery({
-    queryKey: ["tables"],
-    queryFn: getTables,
-  });
+  const { tables, isLoading } = useTables();
 
   if (isLoading) {
     return <LoadingPage />;
@@ -100,17 +95,13 @@ const TableManagementDashboard = () => {
         </div>
 
         {isAddModalOpen && (
-          <AddTableModal
-            onClose={() => setIsAddModalOpen(false)}
-            queryClient={queryClient}
-          />
+          <AddTableModal onClose={() => setIsAddModalOpen(false)} />
         )}
 
         {isEditModalOpen && selectedTable && (
           <EditTableModal
             table={selectedTable}
             onClose={() => setIsEditModalOpen(false)}
-            queryClient={queryClient}
           />
         )}
 
@@ -118,7 +109,6 @@ const TableManagementDashboard = () => {
           <DeleteTableModal
             table={selectedTable}
             onClose={() => setIsDeleteModalOpen(false)}
-            queryClient={queryClient}
           />
         )}
 
