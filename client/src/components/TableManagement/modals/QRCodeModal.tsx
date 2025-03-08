@@ -1,4 +1,3 @@
-// src/components/table-management/modals/QRCodeModal.tsx
 import { QRCodeSVG } from "qrcode.react";
 import { Table } from "../../../types/table.type";
 
@@ -33,6 +32,12 @@ const QRCodeModal = ({ table, onClose }: QRCodeModalProps) => {
     }
   };
 
+  const currentURL = window.location.origin;
+  const queryParams = new URLSearchParams({
+    table: table.table_number,
+  }).toString();
+  const qrValue = `${currentURL}/order?${queryParams}`;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-card p-6 rounded-lg w-full max-w-md">
@@ -41,7 +46,8 @@ const QRCodeModal = ({ table, onClose }: QRCodeModalProps) => {
         </h2>
         <div className="flex justify-center mb-4">
           <QRCodeSVG
-            value={`${import.meta.env.VITE_FRONTEND_URL}/${table.table_number}`}
+            title={`Table ${table.table_number} QR Code`}
+            value={qrValue}
             size={256}
             className="mx-auto qr-code-svg"
           />
