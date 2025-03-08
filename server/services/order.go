@@ -8,115 +8,99 @@ import (
 	"github.com/google/uuid"
 )
 
-// OrderInput dùng để nhận dữ liệu khi tạo đơn hàng mới
+// OrderInput chứa thông tin đầu vào khi tạo hoặc cập nhật đơn hàng.
 type OrderInput struct {
-    TableID       uuid.UUID          `json:"table_id" binding:"required"`
-    TotalAmount   float64            `json:"total_amount" binding:"required"`
-    Status        string             `json:"status"`
-    PaymentMethod string             `json:"payment_method"`
-    OrderItems    []OrderItemInput   `json:"order_items" binding:"required"`
+    TableID       uuid.UUID `json:"table_id" binding:"required"`
+    Note          string    `json:"note"`
+    PaymentMethod string    `json:"payment_method"`
 }
 
-// OrderItemInput dùng để nhận dữ liệu khi tạo mục đơn hàng mới
-type OrderItemInput struct {
-    MenuID   uuid.UUID `json:"menu_id" binding:"required"`
-    Quantity int       `json:"quantity" binding:"required"`
-    Price    float64   `json:"price" binding:"required"`
-}
-
-// GetOrders lấy danh sách các đơn hàng
-func GetOrders() ([]models.Order, error) {
-    var orders []models.Order
-    result := configs.DB.Preload("OrderItems").Find(&orders)
-    return orders, result.Error
-}
-
-// CreateOrder tạo đơn hàng mới
-func CreateOrder(input OrderInput) (models.Order, error) {
-    order := models.Order{
+// CreateOrder tạo đơn hàng mới và gán OrderID vào bảng tables.
+func CreateOrder(input OrderInput) (*models.Order, error) {
+    // Tạo đối tượng Order mới.
+    order := &models.Order{
         ID:            uuid.New(),
-        TableID:       input.TableID,
-        TotalAmount:   input.TotalAmount,
-        Status:        input.Status,
+        TotalAmount:   0.00,
+        Status:        "pending",
+        Note:          input.Note,
         PaymentMethod: input.PaymentMethod,
         CreatedAt:     time.Now(),
         UpdatedAt:     time.Now(),
     }
 
-    result := configs.DB.Create(&order)
-    if result.Error != nil {
-        return order, result.Error
+    // Lưu order vào bảng orders.
+    if err := configs.DB.Create(order).Error; err != nil {
+        return nil, err
     }
 
-    for _, item := range input.OrderItems {
-        orderItem := models.OrderItem{
-            ID:        uuid.New(),
-            OrderID:   order.ID,
-            MenuID:    &item.MenuID,
-            Quantity:  item.Quantity,
-            Price:     item.Price,
-            CreatedAt: time.Now(),
-        }
-        configs.DB.Create(&orderItem)
+    // Cập nhật bảng tables: gán OrderID vào bàn tương ứng.
+    var table models.Table
+    if err := configs.DB.First(&table, "id = ?", input.TableID).Error; err != nil {
+        return nil, err
+    }
+    table.OrderID = &order.ID
+    table.UpdatedAt = time.Now()
+    if err := configs.DB.Save(&table).Error; err != nil {
+        return nil, err
     }
 
     return order, nil
 }
 
-// GetOrder lấy thông tin một đơn hàng
-func GetOrder(id uuid.UUID) (models.Order, error) {
+// GetOrder lấy thông tin đơn hàng theo ID và preload các order items.
+func GetOrder(id uuid.UUID) (*models.Order, error) {
     var order models.Order
-    result := configs.DB.Preload("OrderItems").First(&order, "id = ?", id)
-    return order, result.Error
+    if err := configs.DB.Preload("OrderItems.Menu").First(&order, "id = ?", id).Error; err != nil {
+        return nil, err
+    }
+    return &order, nil
 }
 
-// UpdateOrder cập nhật thông tin một đơn hàng
-func UpdateOrder(id uuid.UUID, input OrderInput) (models.Order, error) {
+// GetAllOrders lấy danh sách tất cả các đơn hàng.
+func GetAllOrders() ([]models.Order, error) {
+    var orders []models.Order
+    if err := configs.DB.Preload("OrderItems.Menu").Find(&orders).Error; err != nil {
+        return nil, err
+    }
+    return orders, nil
+}
+
+// UpdateOrder cập nhật thông tin đơn hàng theo ID.
+func UpdateOrder(id uuid.UUID, input OrderInput) (*models.Order, error) {
     var order models.Order
-    result := configs.DB.First(&order, "id = ?", id)
-    if result.Error != nil {
-        return order, result.Error
+    if err := configs.DB.First(&order, "id = ?", id).Error; err != nil {
+        return nil, err
     }
 
-    order.TableID = input.TableID
-    order.TotalAmount = input.TotalAmount
-    order.Status = input.Status
+    order.Note = input.Note
     order.PaymentMethod = input.PaymentMethod
     order.UpdatedAt = time.Now()
 
-    configs.DB.Save(&order)
-
-    // Xóa các mục đơn hàng cũ
-    configs.DB.Where("order_id = ?", id).Delete(&models.OrderItem{})
-
-    // Thêm các mục đơn hàng mới
-    for _, item := range input.OrderItems {
-        orderItem := models.OrderItem{
-            ID:        uuid.New(),
-            OrderID:   id,
-            MenuID:    &item.MenuID,
-            Quantity:  item.Quantity,
-            Price:     item.Price,
-            CreatedAt: time.Now(),
-        }
-        configs.DB.Create(&orderItem)
+    if err := configs.DB.Save(&order).Error; err != nil {
+        return nil, err
     }
-
-    return order, nil
+    return &order, nil
 }
 
-// DeleteOrder xóa một đơn hàng
+// DeleteOrder xóa đơn hàng theo ID và cập nhật lại bảng tables (xóa OrderID nếu có).
 func DeleteOrder(id uuid.UUID) error {
     var order models.Order
-    result := configs.DB.First(&order, "id = ?", id)
-    if result.Error != nil {
-        return result.Error
+    if err := configs.DB.First(&order, "id = ?", id).Error; err != nil {
+        return err
     }
 
-    // Xóa các mục đơn hàng
-    configs.DB.Where("order_id = ?", id).Delete(&models.OrderItem{})
+    // Tìm bàn đang gán OrderID = id, cập nhật lại cho bàn đó.
+    var table models.Table
+    if err := configs.DB.First(&table, "order_id = ?", id).Error; err == nil {
+        table.OrderID = nil
+        table.UpdatedAt = time.Now()
+        if err := configs.DB.Save(&table).Error; err != nil {
+            return err
+        }
+    }
 
-    // Xóa đơn hàng
-    result = configs.DB.Delete(&order)
-    return result.Error
+    if err := configs.DB.Delete(&order).Error; err != nil {
+        return err
+    }
+    return nil
 }

@@ -25,6 +25,7 @@ func SetupRouter() *gin.Engine {
 	TableRoutes(api)
 	MediaRoutes(api)
 	OrderRoutes(api)
+	OrderItemsRoutes(api)
 
 	return router
 }

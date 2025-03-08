@@ -10,7 +10,7 @@ import (
 
 // GetOrders xử lý API GET /api/orders
 func GetOrders(c *gin.Context) {
-    orders, err := services.GetOrders()
+    orders, err := services.GetAllOrders()
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
@@ -30,7 +30,13 @@ func CreateOrder(c *gin.Context) {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return
     }
-    c.JSON(http.StatusOK, newOrder)
+    // Ensure order items are populated
+    populatedOrder, err := services.GetOrder(newOrder.ID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    c.JSON(http.StatusOK, populatedOrder)
 }
 
 // GetOrder xử lý API GET /api/orders/:id
