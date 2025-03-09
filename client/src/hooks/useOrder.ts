@@ -40,6 +40,9 @@ export const useOrder = () => {
     mutationFn: updateOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toast.success("Order successfully", {
+        autoClose: 1500,
+      });
     },
     onError: () => {
       toast.error("Failed to update order", {

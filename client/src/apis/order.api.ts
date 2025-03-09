@@ -9,15 +9,15 @@ export const api = axios.create({
 
 interface CreateOrderData {
   table_id: string;
-  Note: string;
-  PaymentMethod: string;
+  note: string;
+  payment_method: string;
 }
 
 interface UpdateOrderData {
   id: string;
   table_id: string;
-  Note: string;
-  PaymentMethod: string;
+  note: string;
+  payment_method: string;
 }
 
 export const getOrders = async () => {
@@ -36,7 +36,7 @@ export const createOrder = async (orderData: CreateOrderData) => {
 };
 
 export const updateOrder = async (orderData: UpdateOrderData) => {
-  const res = await api.put(`/admin/order/${orderData.id}`, orderData);
+  const res = await api.put(`/admin/orders/${orderData.id}`, orderData);
   return res.data;
 };
 
