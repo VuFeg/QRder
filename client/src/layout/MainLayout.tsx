@@ -12,8 +12,6 @@ const MainLayout = () => {
     setActiveTab(path || "overview");
   }, [location]);
 
-  console.log(activeTab);
-
   return (
     <div className="flex min-h-screen">
       <Sidebar

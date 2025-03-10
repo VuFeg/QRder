@@ -2,12 +2,15 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
-export interface TableData {
-  id?: string;
+interface createTable {
   table_number: string;
+}
+
+interface updateTable {
+  id: string;
+  table_number: string;
+  order_id?: string | null;
   status?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 export const api = axios.create({
@@ -27,12 +30,12 @@ export const getTable = async (tableId: string) => {
 };
 
 // API tạo bàn mới
-export const createTable = async (tableData: TableData) => {
+export const createTable = async (tableData: createTable) => {
   const res = await api.post("/admin/table", tableData);
   return res.data;
 };
 
-export const updateTable = async (tableData: TableData) => {
+export const updateTable = async (tableData: updateTable) => {
   const res = await api.put(`/admin/table/${tableData.id}`, tableData);
   return res.data;
 };

@@ -11,10 +11,9 @@ interface CreateOrderItem {
 
 interface UpdateOrderItem {
   id: string;
-  order_id: string;
-  menu_id: string;
-  quantity: number;
-  price: number;
+  status: string;
+  quantity?: number;
+  price?: number;
 }
 
 export const api = axios.create({

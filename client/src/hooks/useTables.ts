@@ -11,7 +11,11 @@ import { toast } from "react-toastify";
 export const useTables = () => {
   const queryClient = useQueryClient();
 
-  const { data: tables = [], isLoading } = useQuery({
+  const {
+    data: tables = [],
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["tables"],
     queryFn: getTables,
   });
@@ -78,5 +82,6 @@ export const useTables = () => {
     updateTableMutation,
     deleteTableMutation,
     useGetTable,
+    refetch,
   };
 };

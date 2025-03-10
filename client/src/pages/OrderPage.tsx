@@ -133,6 +133,8 @@ const OrderPage = () => {
     );
   };
 
+  console.log(table);
+
   const getTotalPrice = () => {
     return orderItems
       .reduce((total, item) => total + item.price * item.quantity, 0)
@@ -158,15 +160,22 @@ const OrderPage = () => {
         price: orderItem.price,
       });
     });
-    updateOrderMutation.mutate({
-      id: order?.id ?? "",
-      table_id: tableId ?? "",
-      note: note,
-      payment_method: "cash",
-    });
-    setOrderItems([]);
-    setNote("");
-    setIsCartOpen(false);
+    updateOrderMutation.mutate(
+      {
+        id: order?.id ?? "",
+        table_id: tableId ?? "",
+        note: note,
+        payment_method: "cash",
+        total_amount: parseFloat(getTotalPrice()) + (order?.total_amount ?? 0),
+      },
+      {
+        onSuccess: () => {
+          setOrderItems([]);
+          setNote("");
+          setIsCartOpen(false);
+        },
+      }
+    );
   };
 
   if (isLoading || isLoadingOrder) return <LoadingPage />;

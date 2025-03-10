@@ -9,6 +9,7 @@ import OrderPage from "./pages/OrderPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Dashboard from "./pages/DashBoardPage";
 import MainLayout from "./layout/MainLayout";
+import OrderManagementPage from "./pages/OrderManagementPage";
 // Khởi tạo QueryClient
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ function App() {
             <Route path="/menus" element={<MenuManagementPage />} />
             <Route path="/menu/create" element={<CreateMenuPage />} />
             <Route path="/menu/edit/:id" element={<EditMenuPage />} />
+            <Route path="/orders" element={<OrderManagementPage />} />
           </Route>
 
           <Route path="/order" element={<OrderPage />} />

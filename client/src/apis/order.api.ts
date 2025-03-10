@@ -18,6 +18,7 @@ interface UpdateOrderData {
   table_id: string;
   note: string;
   payment_method: string;
+  total_amount: number;
 }
 
 export const getOrders = async () => {
