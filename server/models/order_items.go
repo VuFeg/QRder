@@ -13,7 +13,8 @@ type OrderItem struct {
     MenuID    uuid.UUID `json:"menu_id"`
     Quantity  int       `json:"quantity"`
     Price     float64   `json:"price"`
+    Status    string    `json:"status"`
     CreatedAt time.Time `json:"created_at"`
     UpdatedAt time.Time `json:"updated_at"`
-    Menu      Menu      `json:"menu" gorm:"foreignKey:MenuID"`
+    Menu      *Menu      `json:"menu" gorm:"foreignKey:MenuID;references:ID"`
 }

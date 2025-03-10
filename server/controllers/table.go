@@ -30,7 +30,7 @@ func GetTable(c *gin.Context) {
     id := c.Param("id")
     table, err := services.GetTable(uuid.MustParse(id))
     if err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+        c.JSON(http.StatusNotFound, gin.H{"error": "Table not found"})
         return
     }
 

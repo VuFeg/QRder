@@ -13,6 +13,8 @@ type OrderInput struct {
     TableID       uuid.UUID `json:"table_id" binding:"required"`
     Note          string    `json:"note"`
     PaymentMethod string    `json:"payment_method"`
+    TotalAmount   float64   `json:"total_amount"`
+    Status        string    `json:"status"`
 }
 
 // CreateOrder tạo đơn hàng mới và gán OrderID vào bảng tables.
@@ -72,8 +74,18 @@ func UpdateOrder(id uuid.UUID, input OrderInput) (*models.Order, error) {
         return nil, err
     }
 
-    order.Note = input.Note
-    order.PaymentMethod = input.PaymentMethod
+    if input.Note != "" {
+        order.Note = input.Note
+    }   
+    if input.PaymentMethod != "" {
+        order.PaymentMethod = input.PaymentMethod
+    }
+    if input.TotalAmount != 0.00 {
+        order.TotalAmount = input.TotalAmount
+    }
+    if input.Status != "" {
+        order.Status = input.Status
+    }
     order.UpdatedAt = time.Now()
 
     if err := configs.DB.Save(&order).Error; err != nil {

@@ -17,10 +17,9 @@ type OrderItemInput struct {
 }
 
 type UpdateOrderItemInput struct {
-    OrderID  uuid.UUID `json:"order_id" binding:"required"`
-    MenuID   uuid.UUID `json:"menu_id" binding:"required"`
-    Quantity int       `json:"quantity" binding:"required,gt=0"`
-    Price    float64   `json:"price" binding:"required"`
+    Quantity *int       `json:"quantity"`
+    Price    *float64   `json:"price"`
+    Status  string    `json:"status"`
 }
 
 // CreateOrderItem tạo mới một order item và lưu vào database.
@@ -31,6 +30,7 @@ func CreateOrderItem(input OrderItemInput) (*models.OrderItem, error) {
         MenuID:    input.MenuID,
         Quantity:  input.Quantity,
         Price:     input.Price,
+        Status:    "pending",
         CreatedAt: time.Now(),
     }
 
@@ -57,9 +57,17 @@ func UpdateOrderItem(id uuid.UUID, input UpdateOrderItemInput) (*models.OrderIte
         return nil, err
     }
 
-    orderItem.MenuID = input.MenuID
-    orderItem.Quantity = input.Quantity
-    orderItem.Price = input.Price
+    if input.Status != "" {
+        orderItem.Status = input.Status
+    }
+    if input.Quantity != nil {
+        orderItem.Quantity = *input.Quantity
+    }
+    if input.Price != nil {
+        orderItem.Price = *input.Price
+    }
+
+    orderItem.UpdatedAt = time.Now()
 
     if err := configs.DB.Save(&orderItem).Error; err != nil {
         return nil, err

@@ -3,6 +3,7 @@ package services
 import (
 	"QRder-be/configs"
 	"QRder-be/models"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,13 +12,14 @@ import (
 // TableInput chứa thông tin đầu vào khi tạo bàn, bao gồm OrderID nếu có
 type TableInput struct {
 	TableNumber string     `json:"table_number" binding:"required"`
+	Capacity    string     `json:"capacity" binding:"required"`
 	OrderID     *uuid.UUID `json:"order_id"` // Optional: nếu bàn đã có order mở
 }
 
 // TableUpdateInput chứa thông tin cập nhật bàn, có thể cập nhật OrderID (để gán hoặc xóa)
 type TableUpdateInput struct {
 	TableNumber string     `json:"table_number"`
-	Status      string     `json:"status"`
+	Capacity    string     `json:"capacity"`
 	OrderID     *uuid.UUID `json:"order_id"` // Optional: truyền giá trị null nếu muốn xóa order_id
 }
 
@@ -28,6 +30,7 @@ func CreateTable(input TableInput) (*models.Table, error) {
 		ID:          uuid.New(),
 		TableNumber: input.TableNumber,
 		OrderID:     input.OrderID,
+		Capacity: 	 input.Capacity,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -42,20 +45,22 @@ func CreateTable(input TableInput) (*models.Table, error) {
 
 // GetTable xử lý logic lấy thông tin bàn theo id
 func GetTable(id uuid.UUID) (*models.Table, error) {
-	var table models.Table
-	if result := configs.DB.First(&table, "id = ?", id); result.Error != nil {
-		return nil, result.Error
-	}
-	return &table, nil
+    var table models.Table
+    if result := configs.DB.Preload("Order.OrderItems.Menu").First(&table, "id = ?", id); result.Error != nil {
+        return nil, result.Error
+    }
+
+    log.Printf("Fetched table: %+v\n", table)
+    return &table, nil
 }
 
 // GetAllTables xử lý logic lấy thông tin tất cả các bàn
 func GetAllTables() ([]models.Table, error) {
-	var tables []models.Table
-	if result := configs.DB.Find(&tables); result.Error != nil {
-		return nil, result.Error
-	}
-	return tables, nil
+    var tables []models.Table
+    if result := configs.DB.Preload("Order.OrderItems.Menu").Find(&tables); result.Error != nil {
+        return nil, result.Error
+    }
+    return tables, nil
 }
 
 // UpdateTable xử lý logic cập nhật thông tin bàn
@@ -69,8 +74,8 @@ func UpdateTable(id uuid.UUID, input TableUpdateInput) (*models.Table, error) {
 	if input.TableNumber != "" {
 		table.TableNumber = input.TableNumber
 	}
-	if input.Status != "" {
-		table.Status = input.Status
+	if input.Capacity != "" {
+		table.Capacity = input.Capacity
 	}
 	// Cập nhật OrderID (có thể là nil để xóa order_id)
 	table.OrderID = input.OrderID
